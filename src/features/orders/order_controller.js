@@ -4,6 +4,7 @@ import UserModel from "../users/user_model.js";
 export const paymentController = async (request, response) => {
   try {
     const { cartItems } = request.body;
+    console.log("cartItems data : ",cartItems);
     const user = await UserModel.findOne({ _id: request.userId });
     const params = {
       submit_type: "pay",

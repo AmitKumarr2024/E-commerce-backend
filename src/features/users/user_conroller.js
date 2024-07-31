@@ -155,22 +155,23 @@ export const logout = async (req, res) => {
   try {
     // Clear the token cookie
     res.clearCookie('token', { path: '/' });
+
+    // Send a successful response
     
-    res.json({
-      message: "Logged out successfully",
-      error: false,
-      success: true,
-      data: [],
-    });
+    // End the response explicitly
     res.end();
   } catch (err) {
-    res.json({
-      message: err.message || err,
+    // Send an error response
+    res.status(500).json({
+      message: err.message || "An error occurred during logout",
       error: true,
       success: false,
     });
+    // End the response explicitly
+    res.end();
   }
 };
+
 
 // all users
 export const allUser = async (req, res) => {

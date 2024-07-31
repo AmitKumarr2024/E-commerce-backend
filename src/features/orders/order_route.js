@@ -1,6 +1,6 @@
 import express from "express";
-import { paymentController } from "./order_controller";
-import jwtAuth from "../../middleware/authMeddleware";
+import { paymentController } from "./order_controller.js";
+import jwtAuth from "../../middleware/authMeddleware.js";
 
 const route = new express.Router();
 

@@ -41,6 +41,7 @@ export const signUp = async (req, res) => {
 };
 
 // Login Controller
+
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -66,6 +67,7 @@ export const login = async (req, res) => {
       return res.status(400).json({ message: "You are already Logged in" });
     }
 
+    // Prepare token data
     const tokenData = {
       _id: userExist._id,
       email: userExist.email,
@@ -73,34 +75,29 @@ export const login = async (req, res) => {
 
     // Generate token
     const token = jwt.sign(tokenData, process.env.SECRET_KEY, {
-      expiresIn: "2h",
+      expiresIn: "2h", // Token expiry time
     });
 
+    // Determine if the environment is production
     const isProduction = process.env.NODE_ENV === "production";
 
-const tokenOptions = {
-  httpOnly: true,
-  secure: isProduction, // Secure cookies only in production
-  sameSite: isProduction && "Lax", // Cross-site requests allowed in production
-  maxAge: 2 * 60 * 60 * 1000, // 24 hours
-};
+    const tokenOptions = {
+      httpOnly: true,
+      secure: isProduction, // Secure cookies only in production
+      sameSite: isProduction ? "Lax" : "Strict", // Cross-site requests allowed in production
+      maxAge: 2 * 60 * 60 * 1000, // 2 hours
+    };
 
-res.cookie("token", token, tokenOptions)
-   .status(200)
-   .json({
-     message: "Login successful",
-     data: token,
-     success: true,
-     error: false,
-   });
+    // Set cookie and respond
+    res.cookie("token", token, tokenOptions)
+       .status(200)
+       .json({
+         message: "Login successful",
+         token,
+         success: true,
+         error: false,
+       });
 
-
-    return res.status(200).json({
-      message: "Login successful",
-      token,
-      success: true,
-      error: false,
-    });
   } catch (error) {
     console.error("Login error:", error);
     return res
@@ -108,6 +105,7 @@ res.cookie("token", token, tokenOptions)
       .json({ message: "Login failed", error: true, success: false });
   }
 };
+
 
 // user Details
 

@@ -17,7 +17,7 @@ app.use(cookieParser());
 
 app.use(
   cors({
-    origin: "https://ecommercemarkets.netlify.app",
+    origin:process.env.FRONTEND_DOMAIN,
     credentials: true,
   })
 );

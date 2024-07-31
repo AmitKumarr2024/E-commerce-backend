@@ -153,12 +153,7 @@ export const userDetails = async (req, res) => {
 
 export const logout = async (req, res) => {
   try {
-    res.clearCookie('token', {
-      path: '/',
-      domain: 'https://e-commerce-backend-tkle.onrender.com', // Set to your domain
-      sameSite: 'None', // Use 'None' for cross-origin requests
-      secure: true // Ensure secure if using HTTPS
-    });
+    res.clearCookie('token');
 
     // Send a successful response
     res.status(200).json({
@@ -168,7 +163,7 @@ export const logout = async (req, res) => {
       data: [],
     });
     // End the response explicitly
-    res.end();
+  
   } catch (err) {
     // Send an error response
     res.status(500).json({
@@ -177,7 +172,7 @@ export const logout = async (req, res) => {
       success: false,
     });
     // End the response explicitly
-    res.end();
+  
   }
 };
 

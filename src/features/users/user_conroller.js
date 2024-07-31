@@ -155,6 +155,7 @@ export const logout = async (req, res) => {
   try {
     // Clear the token cookie
     res.clearCookie('token', { path: '/' });
+    res.end();
 
     res.json({
       message: "Logged out successfully",

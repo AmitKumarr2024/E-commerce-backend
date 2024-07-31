@@ -29,7 +29,7 @@ app.use(express.urlencoded({ limit: "100mb", extended: true }));
 app.use("/api/users", UserRoute);
 app.use("/api/products", ProductRoute);
 app.use("/api/cart", CartRoute);
-app.use("/api/payment/", CheckoutRoute);
+app.use("/api/payment",CheckoutRoute);
 
 // connect database and listen
 connect().then(() => {

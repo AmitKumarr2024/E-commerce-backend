@@ -155,7 +155,7 @@ export const logout = async (req, res) => {
   try {
     res.clearCookie('token', {
       path: '/',
-      domain: 'e-commerce-backend-tkle.onrender.com', // Set to your domain
+      domain: 'https://e-commerce-backend-tkle.onrender.com', // Set to your domain
       sameSite: 'None', // Use 'None' for cross-origin requests
       secure: true // Ensure secure if using HTTPS
     });

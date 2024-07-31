@@ -74,8 +74,8 @@ export const login = async (req, res) => {
     };
 
     // Generate token
-    const token = jwt.sign(tokenData, process.env.SECRET_KEY, {
-      expiresIn: "2h", // Token expiry time
+    const token = await jwt.sign(tokenData, process.env.SECRET_KEY, {
+      expiresIn: 60 * 60 * 8,
     });
 
     // Determine if the environment is production
@@ -88,7 +88,7 @@ export const login = async (req, res) => {
     // Set cookie and respond
     res.cookie("token", token, tokenOptions).status(200).json({
       message: "Login successful",
-      token,
+      data: token,
       success: true,
       error: false,
     });

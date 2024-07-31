@@ -14,6 +14,8 @@ const app = express();
 const port = process.env.PORT;
 
 app.use(cookieParser());
+console.log("process.env.FRONTEND_DOMAIN",process.env.FRONTEND_DOMAIN),
+
 
 app.use(
   cors({

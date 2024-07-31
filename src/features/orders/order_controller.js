@@ -5,6 +5,10 @@ export const paymentController = async (request, response) => {
   try {
     const { cartItems } = request.body;
     const user = await UserModel.findOne({ _id: request.userId });
+
+    // Log cartItems to check structure and URLs
+    console.log("cartItems:", JSON.stringify(cartItems, null, 2));
+
     const params = {
       submit_type: "pay",
       mode: "payment",
@@ -17,12 +21,17 @@ export const paymentController = async (request, response) => {
       ],
       customer_email: user.email,
       line_items: cartItems.map((items, index) => {
+        // Log each item to verify productImage
+        console.log("productImage:", items.productId.productImage);
+
         return {
           price_data: { // corrected from price_Data to price_data
             currency: "inr",
             product_data: {
               name: items.productId.productName,
               images: [items.productId.productImage], // should be an array of strings
+              // For testing, set a static image URL
+              // images: ["http://example.com/static_image.jpg"], 
               metadata: {
                 productId: items.productId._id,
               },
@@ -40,6 +49,8 @@ export const paymentController = async (request, response) => {
       cancel_url: `${process.env.FRONTEND_DOMAIN}/cancel`,
     };
 
+    console.log("Stripe session params:", JSON.stringify(params, null, 2)); // Log the params for debugging
+
     const session = await stripe.checkout.sessions.create(params);
     response.status(303).json(session);
   } catch (error) {
@@ -50,3 +61,4 @@ export const paymentController = async (request, response) => {
     });
   }
 };
+

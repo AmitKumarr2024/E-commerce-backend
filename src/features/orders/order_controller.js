@@ -6,8 +6,6 @@ export const paymentController = async (request, response) => {
     const { cartItems } = request.body;
     const user = await UserModel.findOne({ _id: request.userId });
 
-    // Log cartItems to check structure and URLs
-    console.log("cartItems:", JSON.stringify(cartItems, null, 2));
 
     const params = {
       submit_type: "pay",
@@ -21,8 +19,6 @@ export const paymentController = async (request, response) => {
       ],
       customer_email: user.email,
       line_items: cartItems.map((items, index) => {
-        // Log each item to verify productImage
-        console.log("productImage:", items.productId.productImage);
 
         return {
           price_data: { // corrected from price_Data to price_data
@@ -47,7 +43,6 @@ export const paymentController = async (request, response) => {
       cancel_url: `${process.env.FRONTEND_DOMAIN}/cancel`,
     };
 
-    console.log("Stripe session params:", JSON.stringify(params, null, 2)); // Log the params for debugging
 
     const session = await stripe.checkout.sessions.create(params);
     response.status(303).json(session);

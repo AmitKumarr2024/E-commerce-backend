@@ -85,19 +85,17 @@ export const login = async (req, res) => {
       httpOnly: true,
       secure: isProduction, // Secure cookies only in production
       sameSite: isProduction ? "Lax" : "Strict", // Cross-site requests allowed in production
+      secure: true,
       maxAge: 2 * 60 * 60 * 1000, // 2 hours
     };
 
     // Set cookie and respond
-    res.cookie("token", token, tokenOptions)
-       .status(200)
-       .json({
-         message: "Login successful",
-         token,
-         success: true,
-         error: false,
-       });
-
+    res.cookie("token", token, tokenOptions).status(200).json({
+      message: "Login successful",
+      token,
+      success: true,
+      error: false,
+    });
   } catch (error) {
     console.error("Login error:", error);
     return res
@@ -105,7 +103,6 @@ export const login = async (req, res) => {
       .json({ message: "Login failed", error: true, success: false });
   }
 };
-
 
 // user Details
 
@@ -151,7 +148,7 @@ export const userDetails = async (req, res) => {
 
 export const logout = async (req, res) => {
   try {
-    res.clearCookie('token');
+    res.clearCookie("token");
 
     // Send a successful response
     res.status(200).json({
@@ -161,7 +158,6 @@ export const logout = async (req, res) => {
       data: [],
     });
     // End the response explicitly
-  
   } catch (err) {
     // Send an error response
     res.status(500).json({
@@ -170,10 +166,8 @@ export const logout = async (req, res) => {
       success: false,
     });
     // End the response explicitly
-  
   }
 };
-
 
 // all users
 export const allUser = async (req, res) => {

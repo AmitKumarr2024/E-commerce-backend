@@ -85,7 +85,7 @@ export const login = async (req, res) => {
     const tokenOptions = {
       httpOnly: true,
       secure: isProduction, // Secure cookies only in production
-      sameSite: isProduction ? "Lax" : "Strict", // Adjust for development vs. production
+      sameSite: isProduction ? "Lax" : "None", // Adjust for development vs. production
     };
 
     // Set cookie and respond

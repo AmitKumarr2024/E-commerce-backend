@@ -42,7 +42,6 @@ export const signUp = async (req, res) => {
 
 // Login Controller
 
-
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -76,7 +75,7 @@ export const login = async (req, res) => {
 
     // Generate token
     const token = await jwt.sign(tokenData, process.env.SECRET_KEY, {
-      expiresIn: 60*60*8, // Token expiry set to 8 hours
+      expiresIn: 60 * 60 * 8, // Token expiry set to 8 hours
     });
 
     // Determine if the environment is production
@@ -85,18 +84,16 @@ export const login = async (req, res) => {
     const tokenOptions = {
       httpOnly: true,
       secure: isProduction, // Secure cookies only in production
-      sameSite: isProduction ? "Lax" : "None", // Adjust for development vs. production
+      sameSite: isProduction ? "None" : "Lax", // Adjust for development vs. production
     };
 
     // Set cookie and respond
-    res.cookie("token", token, tokenOptions)
-       .status(200)
-       .json({
-         message: "Login successful",
-         data: token,
-         success: true,
-         error: false,
-       });
+    res.cookie("token", token, tokenOptions).status(200).json({
+      message: "Login successful",
+      data: token,
+      success: true,
+      error: false,
+    });
   } catch (error) {
     console.error("Login error:", error);
     return res
@@ -104,7 +101,6 @@ export const login = async (req, res) => {
       .json({ message: "Login failed", error: true, success: false });
   }
 };
-
 
 // user Details
 

@@ -8,7 +8,7 @@ export const paymentController = async (request, response) => {
     const params = {
       submit_type: "pay",
       mode: "payment",
-      payment_method_types: ["cards"],
+      payment_method_types: ["card"], // corrected from "cards" to "card"
       billing_address_collection: "auto",
       shipping_options: [
         {
@@ -18,27 +18,26 @@ export const paymentController = async (request, response) => {
       customer_email: user.email,
       line_items: cartItems.map((items, index) => {
         return {
-          price_Data: {
+          price_data: { // corrected from price_Data to price_data
             currency: "inr",
             product_data: {
               name: items.productId.productName,
-              images: items.productId.productImage,
+              images: [items.productId.productImage], // should be an array
               metadata: {
                 productId: items.productId._id,
               },
             },
-            unit_amount: items.productId.selling,
+            unit_amount: items.productId.selling * 100, // Stripe expects amount in cents
           },
           adjustable_quantity: {
             enabled: true,
-            minimum:1
+            minimum: 1
           },
-          quantity:items.quantity
-        }
-
+          quantity: items.quantity
+        };
       }),
-      success_url:`${process.env.FRONTEND_DOMAIN}/success`,
-      cancel_url:`${process.env.FRONTEND_DOMAIN}/cancel`,
+      success_url: `${process.env.FRONTEND_DOMAIN}/success`,
+      cancel_url: `${process.env.FRONTEND_DOMAIN}/cancel`,
     };
 
     const session = await stripe.checkout.sessions.create(params);

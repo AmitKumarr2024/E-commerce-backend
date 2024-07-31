@@ -73,18 +73,27 @@ export const login = async (req, res) => {
 
     // Generate token
     const token = jwt.sign(tokenData, process.env.SECRET_KEY, {
-      expiresIn: "1h",
+      expiresIn: "24h",
     });
 
-    const tokenOption = {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production", // Must be true if using SameSite=None
-      maxAge: 1 * 60 * 60 * 1000, // 24 hours
-      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax", // Allow all cross-site requests
-    };
+    const isProduction = process.env.NODE_ENV === "production";
 
-    res.cookie("token", token, tokenOption);
-    console.log("Token set in cookie for user:", email);
+const tokenOptions = {
+  httpOnly: true,
+  secure: isProduction, // Secure cookies only in production
+  sameSite: isProduction ? "None" : "Lax", // Cross-site requests allowed in production
+  maxAge: 24 * 60 * 60 * 1000, // 24 hours
+};
+
+res.cookie("token", token, tokenOptions)
+   .status(200)
+   .json({
+     message: "Login successful",
+     data: token,
+     success: true,
+     error: false,
+   });
+
 
     return res.status(200).json({
       message: "Login successful",

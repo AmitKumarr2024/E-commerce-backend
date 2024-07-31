@@ -29,9 +29,7 @@ export const paymentController = async (request, response) => {
             currency: "inr",
             product_data: {
               name: items.productId.productName,
-              images: [items.productId.productImage], // should be an array of strings
-              // For testing, set a static image URL
-              // images: ["http://example.com/static_image.jpg"], 
+              images: items.productId.productImage, // should be an array of strings
               metadata: {
                 productId: items.productId._id,
               },
@@ -61,4 +59,3 @@ export const paymentController = async (request, response) => {
     });
   }
 };
-

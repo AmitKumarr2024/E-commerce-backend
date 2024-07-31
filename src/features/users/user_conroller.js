@@ -73,7 +73,7 @@ export const login = async (req, res) => {
 
     // Generate token
     const token = jwt.sign(tokenData, process.env.SECRET_KEY, {
-      expiresIn: "24h",
+      expiresIn: "2h",
     });
 
     const isProduction = process.env.NODE_ENV === "production";
@@ -81,8 +81,8 @@ export const login = async (req, res) => {
 const tokenOptions = {
   httpOnly: true,
   secure: isProduction, // Secure cookies only in production
-  sameSite: isProduction ? "None" : "Lax", // Cross-site requests allowed in production
-  maxAge: 24 * 60 * 60 * 1000, // 24 hours
+  sameSite: isProduction && "Lax", // Cross-site requests allowed in production
+  maxAge: 2 * 60 * 60 * 1000, // 24 hours
 };
 
 res.cookie("token", token, tokenOptions)

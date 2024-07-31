@@ -22,12 +22,12 @@ export const paymentController = async (request, response) => {
             currency: "inr",
             product_data: {
               name: items.productId.productName,
-              images: [items.productId.productImage], // should be an array
+              images: [items.productId.productImage], // should be an array of strings
               metadata: {
                 productId: items.productId._id,
               },
             },
-            unit_amount: items.productId.selling * 100, // Stripe expects amount in cents
+            unit_amount: items.productId.selling * 100, // Stripe expects amount in the smallest currency unit (e.g., paise for INR)
           },
           adjustable_quantity: {
             enabled: true,

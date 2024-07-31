@@ -79,13 +79,10 @@ export const login = async (req, res) => {
     });
 
     // Determine if the environment is production
-    const isProduction = process.env.NODE_ENV === "production";
 
     const tokenOptions = {
       httpOnly: true,
-      secure: isProduction, // Secure cookies only in production
       secure: true,
-      maxAge: 2 * 60 * 60 * 1000, // 2 hours
     };
 
     // Set cookie and respond

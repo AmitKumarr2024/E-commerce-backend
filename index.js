@@ -17,10 +17,16 @@ app.use(cookieParser());
 
 app.use(
   cors({
-    origin:process.env.FRONTEND_DOMAIN,
+    origin: process.env.FRONTEND_DOMAIN,
     credentials: true,
   })
 );
+
+// Handle preflight requests
+app.options('*', cors({
+  origin: process.env.FRONTEND_DOMAIN,
+  credentials: true,
+}));
 
 app.use(express.json({ limit: "100mb" }));
 app.use(express.urlencoded({ limit: "100mb", extended: true }));

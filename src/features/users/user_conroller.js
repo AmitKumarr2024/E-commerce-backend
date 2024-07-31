@@ -84,7 +84,6 @@ export const login = async (req, res) => {
     const tokenOptions = {
       httpOnly: true,
       secure: isProduction, // Secure cookies only in production
-      sameSite: isProduction ? "Lax" : "None", // Cross-site requests allowed in production
       secure: true,
       maxAge: 2 * 60 * 60 * 1000, // 2 hours
     };

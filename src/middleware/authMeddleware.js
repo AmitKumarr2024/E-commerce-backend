@@ -2,9 +2,11 @@ import jwt from 'jsonwebtoken';
 
 const jwtAuth = (req, res, next) => {
   const token = req.cookies?.token;
+  const id = req.params.id;
 
   
   console.log("JWT Token:", token);
+  console.log("ID:", id);
 
   if (!process.env.SECRET_KEY) {
     return res.status(500).json({ error: 'Missing SECRET_KEY environment variable' });

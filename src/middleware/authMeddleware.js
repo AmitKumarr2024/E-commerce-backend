@@ -4,6 +4,10 @@ const jwtAuth = (req, res, next) => {
   const token = req.Cookies?.token;
   const id = req.params.id;
 
+  console.log("jwttoken",token);
+  console.log("jwttoken",id);
+
+
   if (!process.env.SECRET_KEY) {
     return res.status(500).json({ error: 'Missing SECRET_KEY environment variable' });
   }

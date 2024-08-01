@@ -42,6 +42,7 @@ export const signUp = async (req, res) => {
 
 // Login Controller
 
+
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -60,11 +61,19 @@ export const login = async (req, res) => {
       return res.status(400).json({ message: "Invalid Credentials" });
     }
 
-    // Check if user is already logged in (optional based on your logic)
-    const isLogin = req.cookies.token;
-    if (isLogin) {
-      console.error("User already logged in:", email);
-      return res.status(400).json({ message: "You are already Logged in" });
+    // Check if user is already logged in
+    const token = req.cookies.token;
+    if (token) {
+      try {
+        const decoded = await jwt.verify(token, process.env.SECRET_KEY);
+        if (decoded._id === userExist._id.toString()) {
+          console.error("User already logged in:", email);
+          return res.status(400).json({ message: "You are already Logged in" });
+        }
+      } catch (err) {
+        // Token is invalid or expired
+        console.warn("Invalid or expired token:", err.message);
+      }
     }
 
     // Prepare token data
@@ -74,7 +83,7 @@ export const login = async (req, res) => {
     };
 
     // Generate token
-    const token = await jwt.sign(tokenData, process.env.SECRET_KEY, {
+    const newToken = await jwt.sign(tokenData, process.env.SECRET_KEY, {
       expiresIn: 60 * 60 * 8, // Token expiry set to 8 hours
     });
 
@@ -83,14 +92,14 @@ export const login = async (req, res) => {
 
     const tokenOptions = {
       httpOnly: true,
-      secure: isProduction, // Secure cookies only in production
+      secure: true, // Secure cookies only in production
       sameSite: isProduction ? "None" : "Lax", // Adjust for development vs. production
     };
 
     // Set cookie and respond
-    res.cookie("token", token, tokenOptions).status(200).json({
+    res.cookie("token", newToken, tokenOptions).status(200).json({
       message: "Login successful",
-      data: token,
+      data: newToken,
       success: true,
       error: false,
     });
@@ -102,12 +111,14 @@ export const login = async (req, res) => {
   }
 };
 
+
 // user Details
 
 export const userDetails = async (req, res) => {
   try {
     // Check if userId is present in the request
     if (!req.userId) {
+      console.error("User ID is missing in the request");
       return res.status(400).json({
         message: "User ID is missing",
         error: true,
@@ -115,17 +126,22 @@ export const userDetails = async (req, res) => {
       });
     }
 
+    console.log("Fetching user details for user ID:", req.userId);
+
     // Fetch user details from the database
     const user = await UserModel.findById(req.userId);
 
     // Check if user exists
     if (!user) {
+      console.error("User not found for ID:", req.userId);
       return res.status(404).json({
         message: "User not found",
         error: true,
         success: false,
       });
     }
+
+    console.log("User details retrieved:", user);
 
     // Send user details in response
     res.status(200).json({
@@ -134,7 +150,6 @@ export const userDetails = async (req, res) => {
       error: false,
       success: true,
     });
-    console.log(user);
   } catch (error) {
     console.error("Error fetching user details:", error);
     res.status(500).json({
@@ -144,6 +159,7 @@ export const userDetails = async (req, res) => {
     });
   }
 };
+
 
 export const logout = async (req, res) => {
   try {

@@ -10,7 +10,7 @@ export const paymentController = async (request, response) => {
     const params = {
       submit_type: "pay",
       mode: "payment",
-      payment_method_types: ["card"], // corrected from "cards" to "card"
+      payment_method_types: ["card"], 
       billing_address_collection: "auto",
       shipping_options: [
         {
@@ -21,16 +21,16 @@ export const paymentController = async (request, response) => {
       line_items: cartItems.map((items, index) => {
 
         return {
-          price_data: { // corrected from price_Data to price_data
+          price_data: { 
             currency: "inr",
             product_data: {
               name: items.productId.productName,
-              images: items.productId.productImage, // should be an array of strings
+              images: items.productId.productImage, 
               metadata: {
                 productId: items.productId._id,
               },
             },
-            unit_amount: items.productId.selling * 100, // Stripe expects amount in the smallest currency unit (e.g., paise for INR)
+            unit_amount: items.productId.selling * 100, 
           },
           adjustable_quantity: {
             enabled: true,

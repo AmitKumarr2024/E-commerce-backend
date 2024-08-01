@@ -20,6 +20,9 @@ export const paymentController = async (request, response) => {
         },
       ],
       customer_email: user.email,
+      metadata: {
+        userId: request.userId,
+      },
       line_items: cartItems.map((items, index) => {
         return {
           price_data: {
@@ -77,6 +80,19 @@ export const webhooks = async (request, response) => {
     } catch (err) {
       response.status(400).send(`Webhook Error: ${err.message}`);
       return;
+    }
+
+    switch (event.type) {
+      case 'checkout.session.completed':
+        const session = event.data.object;
+        const lineItems=await strip.checkout.sessions.listLineItems(session.id);
+        
+
+       
+        break;
+      // ... handle other event types
+      default:
+        console.log(`Unhandled event type ${event.type}`);
     }
     response.status(200).send();
   } catch (error) {

@@ -59,7 +59,6 @@ export const paymentController = async (request, response) => {
   }
 };
 
-// function retrive the data as per input recieve
 const getLineItems = async (lineItems) => {
   const ProductItems = [];
 
@@ -73,7 +72,7 @@ const getLineItems = async (lineItems) => {
         name: product.name,
         price: item.price.unit_amount / 100,
         quantity: item.quantity,
-        image: product.image,
+        image: product.images[0], // Ensure you handle images array correctly
       };
       ProductItems.push(productData);
     }
@@ -85,19 +84,14 @@ export const webhooks = async (request, response) => {
   try {
     const sig = request.headers["stripe-signature"];
 
-    const payLoadString = JSON.stringify(request.body);
-
-    const header = stripe.webhooks.generateTestHeaderString({
-      payload: payloadString,
-      secret: endpointSecret,
-    });
+    const payloadString = JSON.stringify(request.body);
 
     let event;
 
     try {
       event = stripe.webhooks.constructEvent(
-        payLoadString,
-        header,
+        payloadString,
+        sig, // Use the signature from request headers
         endpointSecret
       );
     } catch (err) {
@@ -108,9 +102,7 @@ export const webhooks = async (request, response) => {
     switch (event.type) {
       case "checkout.session.completed":
         const session = event.data.object;
-        const lineItems = await strip.checkout.sessions.listLineItems(
-          session.id
-        );
+        const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
         const productDetails = await getLineItems(lineItems);
 
         const OrderDetails = {
@@ -122,11 +114,11 @@ export const webhooks = async (request, response) => {
             payment_method_type: session.payment_method_types,
             payment_status: session.payment_status,
           },
-          shipping_options:session.shipping_options,
-          totalAmount:session.amount_total/100,
+          shipping_options: session.shipping_options,
+          totalAmount: session.amount_total / 100,
         };
 
-        const order = await order_module(OrderDetails);
+        const order = order_module(OrderDetails);
 
         const saveOrder = await order.save();
 
@@ -137,7 +129,8 @@ export const webhooks = async (request, response) => {
     }
     response.status(200).send();
   } catch (error) {
-    response.json({
+    console.error("Webhook error:", error);
+    response.status(500).json({
       message: error?.message || error,
       error: true,
       success: false,

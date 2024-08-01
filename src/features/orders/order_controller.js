@@ -60,6 +60,7 @@ export const paymentController = async (request, response) => {
   }
 };
 
+// function
 const getLineItems = async (lineItems) => {
   const ProductItems = [];
 
@@ -87,12 +88,18 @@ export const webhooks = async (request, response) => {
 
     const payloadString = JSON.stringify(request.body);
 
+    const header = stripe.webhooks.generateTestHeaderString({
+      payload: payloadString,
+      sig,
+      secret: endpointSecret,
+    });
+
     let event;
 
     try {
       event = stripe.webhooks.constructEvent(
         payloadString,
-        sig, // Use the signature from request headers
+        header, // Use the signature from request headers
         endpointSecret
       );
     } catch (err) {

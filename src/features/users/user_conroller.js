@@ -35,13 +35,11 @@ export const signUp = async (req, res) => {
       message: "User created successfully",
     });
   } catch (error) {
-    console.error("SignUp error: ", error.message); // Debug line
     res.status(500).json({ error: true, error: error.message });
   }
 };
 
 // Login Controller
-
 
 export const login = async (req, res) => {
   try {
@@ -50,14 +48,12 @@ export const login = async (req, res) => {
     // Check if user exists
     const userExist = await UserModel.findOne({ email });
     if (!userExist) {
-      console.error("User not found:", email);
       return res.status(400).json({ message: "User Not Found!!" });
     }
 
     // Check password validity
     const isValidPassword = await bcrypt.compare(password, userExist.password);
     if (!isValidPassword) {
-      console.error("Invalid password for user:", email);
       return res.status(400).json({ message: "Invalid Credentials" });
     }
 
@@ -67,12 +63,11 @@ export const login = async (req, res) => {
       try {
         const decoded = await jwt.verify(token, process.env.SECRET_KEY);
         if (decoded._id === userExist._id.toString()) {
-          console.error("User already logged in:", email);
           return res.status(400).json({ message: "You are already Logged in" });
         }
       } catch (err) {
         // Token is invalid or expired
-        console.warn("Invalid or expired token:", err.message);
+        res.status(400).json("Invalid or expired token:", err.message);
       }
     }
 
@@ -104,13 +99,11 @@ export const login = async (req, res) => {
       error: false,
     });
   } catch (error) {
-    console.error("Login error:", error);
     return res
       .status(500)
       .json({ message: "Login failed", error: true, success: false });
   }
 };
-
 
 // user Details
 
@@ -118,15 +111,12 @@ export const userDetails = async (req, res) => {
   try {
     // Check if userId is present in the request
     if (!req.userId) {
-      console.error("User ID is missing in the request");
       return res.status(400).json({
         message: "User ID is missing",
         error: true,
         success: false,
       });
     }
-
-    console.log("Fetching user details for user ID:", req.userId);
 
     // Fetch user details from the database
     const user = await UserModel.findById(req.userId);
@@ -140,8 +130,6 @@ export const userDetails = async (req, res) => {
         success: false,
       });
     }
-
-    console.log("User details retrieved:", user);
 
     // Send user details in response
     res.status(200).json({
@@ -160,10 +148,8 @@ export const userDetails = async (req, res) => {
   }
 };
 
-
 export const logout = async (req, res) => {
   try {
-    console.log("Clearing cookie for logout");
     res.clearCookie("token", {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -171,7 +157,6 @@ export const logout = async (req, res) => {
       path: "/", // Ensure the path matches the one used during setting the cookie
     });
 
-    console.log("Cookie cleared");
     // Send a successful response
     res.status(200).json({
       message: "Logged out successfully",

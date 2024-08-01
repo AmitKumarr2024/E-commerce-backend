@@ -79,7 +79,7 @@ export const login = async (req, res) => {
 
     // Generate token
     const newToken = await jwt.sign(tokenData, process.env.SECRET_KEY, {
-      expiresIn: 60 * 60 * 8, // Token expiry set to 8 hours
+      expiresIn: 24* 60 * 60 , // Token expiry set to 8 hours
     });
 
     // Determine if the environment is production

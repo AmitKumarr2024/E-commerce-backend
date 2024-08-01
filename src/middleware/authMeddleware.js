@@ -1,10 +1,11 @@
 import jwt from 'jsonwebtoken';
 
 const jwtAuth = (req, res, next) => {
-  // Ensure the cookie-parser middleware is used in your app
-  const token = req.cookies?.token; // Corrected to lowercase 'cookies'
+  console.log('Incoming request params:', req.params);
+  const token = req.cookies?.token;
   const id = req.params.id;
 
+  
   console.log("JWT Token:", token);
   console.log("ID:", id);
 

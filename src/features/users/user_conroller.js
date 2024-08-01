@@ -134,6 +134,7 @@ export const userDetails = async (req, res) => {
       error: false,
       success: true,
     });
+    console.log(user);
   } catch (error) {
     console.error("Error fetching user details:", error);
     res.status(500).json({

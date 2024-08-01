@@ -2,6 +2,7 @@ import { request, response } from "express";
 import stripe from "../../config/strip.js";
 import UserModel from "../users/user_model.js";
 import order_module from "./order_module.js";
+import CartModel from "../cart/cart_model.js";
 
 // this is secret key
 const endpointSecret = process.env.STRIPE_END_POINT_SECRET_KEY;
@@ -136,6 +137,12 @@ export const webhooks = async (request, response) => {
         const order = order_module(OrderDetails);
 
         const saveOrder = await order.save();
+
+        if (saveOrder?._id) {
+          const deleteCartItems = await CartModel.deleteMany({
+            userId: session.metadata.userId,
+          });
+        }
 
         break;
       // ... handle other event types

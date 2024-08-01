@@ -5,6 +5,6 @@ import jwtAuth from "../../middleware/authMeddleware.js";
 const route = new express.Router();
 
 route.post("/checkout", jwtAuth, paymentController);
-route.post("webhook", webhooks);
+route.post("/webhook", webhooks);
 
 export default route;

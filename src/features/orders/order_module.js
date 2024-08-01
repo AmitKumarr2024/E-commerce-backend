@@ -3,16 +3,24 @@ import mongoose from "mongoose";
 const orderSchema = new mongoose.Schema(
   {
     productDetails: {
-      type: Array,
+      type: [
+        {
+          productId: String,
+          name: String,
+          price: Number,
+          quantity: Number,
+          image: String,
+        }
+      ],
       default: [],
     },
-
     email: {
       type: String,
       default: "",
     },
     userId: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User', // Assuming you have a User model
       default: "",
     },
     paymentDetails: {
@@ -20,13 +28,19 @@ const orderSchema = new mongoose.Schema(
         type: String,
         default: "",
       },
-      payment_method_type: [],
+      payment_method_type: {
+        type: [String],
+        default: [],
+      },
       payment_status: {
         type: String,
         default: "",
       },
     },
-    shipping_options: [],
+    shipping_options: {
+      type: Array,
+      default: [],
+    },
     totalAmount: {
       type: Number,
       default: 0,

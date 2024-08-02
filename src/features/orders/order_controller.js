@@ -208,7 +208,7 @@ export const cancelOrderController = async (request, response) => {
       });
     }
 
-    const cancellation = new Cancellation({
+    const cancellation = await Cancellation({
       orderId: order._id,
       productId: productId,
       reason: reason,

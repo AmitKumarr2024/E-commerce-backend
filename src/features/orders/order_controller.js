@@ -164,7 +164,9 @@ export const orderDetails = async (request, response) => {
   try {
     const currectUserId = request.userId;
 
-    const orderList = await order_module.find({ userId: currectUserId });
+    const orderList = await order_module
+      .find({ userId: currectUserId })
+      .sort({ createdAt: -1 });
 
     response.status(201).json({
       data: orderList,
@@ -173,6 +175,45 @@ export const orderDetails = async (request, response) => {
     });
   } catch (error) {
     response.json({
+      message: error?.message || error,
+      error: true,
+      success: false,
+    });
+  }
+};
+
+
+export const cancelOrderController = async (request, response) => {
+  try {
+    const { orderId } = request.params;
+
+    // Fetch the order details
+    const order = await order_module.findById(orderId);
+
+    if (!order) {
+      return response.status(404).json({
+        message: "Order not found",
+        error: true,
+        success: false,
+      });
+    }
+
+    // If needed, handle refund logic here using Stripe's refund API
+    if (order.paymentDetails.paymentId) {
+      await stripe.refunds.create({
+        payment_intent: order.paymentDetails.paymentId,
+      });
+    }
+
+    // Delete the order
+    await order_module.findByIdAndDelete(orderId);
+
+    response.status(200).json({
+      message: "Order canceled successfully",
+      success: true,
+    });
+  } catch (error) {
+    response.status(500).json({
       message: error?.message || error,
       error: true,
       success: false,

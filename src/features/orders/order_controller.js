@@ -182,10 +182,9 @@ export const orderDetails = async (request, response) => {
   }
 };
 
-
 export const cancelOrderController = async (request, response) => {
   try {
-    const { productId, reason } = request.body; // Extract productId and reason from request body
+    const { productId, reason } = request.body;
 
     if (!productId) {
       return response.status(400).json({
@@ -195,7 +194,10 @@ export const cancelOrderController = async (request, response) => {
       });
     }
 
-    const order = await order_module.findOne({ "productDetails.productId": productId });
+    // Find the order based on productId
+    const order = await order_module.findOne({
+      "productDetails.productId": productId,
+    });
 
     if (!order) {
       return response.status(404).json({
@@ -205,39 +207,21 @@ export const cancelOrderController = async (request, response) => {
       });
     }
 
-    if (order.paymentDetails.paymentId) {
-      try {
-        // Retrieve the charge from Stripe
-        const charge = await stripe.charges.retrieve(order.paymentDetails.paymentId);
-
-        // Check if the charge has already been refunded
-        if (charge.refunded) {
-          return response.status(400).json({
-            message: "Charge has already been refunded",
-            error: true,
-            success: false,
-          });
-        }
-
-        // Issue the refund
-        await stripe.refunds.create({
-          payment_intent: order.paymentDetails.paymentId,
-        });
-      } catch (refundError) {
-        return response.status(500).json({
-          message: "Refund failed: " + refundError.message,
-          error: true,
-          success: false,
-        });
-      }
-    }
-
     // Store the cancellation reason
     if (reason) {
       order.cancellationReason = reason;
+    } else {
+      return response.status(400).json({
+        message: "Cancellation reason is required",
+        error: true,
+        success: false,
+      });
     }
 
+    // Save the updated order with the cancellation reason
     await order.save();
+
+    // Delete the order
     await order_module.findByIdAndDelete(order._id);
 
     response.status(200).json({
@@ -252,5 +236,3 @@ export const cancelOrderController = async (request, response) => {
     });
   }
 };
-
-

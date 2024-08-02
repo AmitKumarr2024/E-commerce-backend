@@ -49,10 +49,6 @@ const orderSchema = new mongoose.Schema(
       type: String,
       default: "", // Optional field for storing cancellation reason
     },
-    isRefunded: {
-      type: Boolean,
-      default: false,
-    },
   },
   {
     timestamps: true,

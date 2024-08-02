@@ -189,9 +189,9 @@ export const cancelOrderController = async (request, response) => {
   try {
     const { productId, reason } = request.body;
 
-    if (!productId) {
+    if (!productId || !reason) {
       return response.status(400).json({
-        message: "Product ID is required",
+        message: "Product ID and reason are required",
         error: true,
         success: false,
       });
@@ -213,9 +213,6 @@ export const cancelOrderController = async (request, response) => {
       reason: reason,
     });
     await cancellation.save();
-
-    order.cancellationReason = reason;
-    await order.save();
 
     await Order.findByIdAndDelete(order._id);
 

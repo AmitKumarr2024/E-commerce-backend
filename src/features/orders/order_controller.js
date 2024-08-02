@@ -187,44 +187,50 @@ export const orderDetails = async (request, response) => {
 
 export const cancelOrderController = async (request, response) => {
   try {
-    const userId = request.userId; // Correctly obtain userId
-    console.log("User ID:", userId);
+    const { orderId } = request.params; // Get the orderId from request parameters
 
-    // Fetch all orders for the user
-    const orders = await order_module.find({ userId });
-
-    if (orders.length === 0) {
-      return response.status(404).json({
-        message: "No orders found for this user",
+    if (!orderId) {
+      return response.status(400).json({
+        message: "Order ID is required",
         error: true,
         success: false,
       });
     }
 
-    // Process each order
-    for (const order of orders) {
-      // Handle refund logic if needed
-      if (order.paymentDetails && order.paymentDetails.paymentId) {
-        try {
-          await stripe.refunds.create({
-            payment_intent: order.paymentDetails.paymentId,
-          });
-        } catch (refundError) {
-          console.error("Refund failed:", refundError.message);
-          // Optionally, handle partial success or continue with order deletion
-        }
-      }
+    // Fetch the order details
+    const order = await order_module.findById(orderId);
 
-      // Delete the order
-      await order_module.findByIdAndDelete(order._id);
+    if (!order) {
+      return response.status(404).json({
+        message: "Order not found",
+        error: true,
+        success: false,
+      });
     }
 
+    // Handle refund logic if necessary
+    if (order.paymentDetails.paymentId) {
+      try {
+        await stripe.refunds.create({
+          payment_intent: order.paymentDetails.paymentId,
+        });
+      } catch (refundError) {
+        return response.status(500).json({
+          message: "Refund failed: " + refundError.message,
+          error: true,
+          success: false,
+        });
+      }
+    }
+
+    // Delete the order
+    await order_module.findByIdAndDelete(orderId);
+
     response.status(200).json({
-      message: "All orders canceled successfully",
+      message: "Order canceled successfully",
       success: true,
     });
   } catch (error) {
-    console.error("Cancel Order Error:", error);
     response.status(500).json({
       message: error.message || "Internal Server Error",
       error: true,
@@ -232,3 +238,4 @@ export const cancelOrderController = async (request, response) => {
     });
   }
 };
+

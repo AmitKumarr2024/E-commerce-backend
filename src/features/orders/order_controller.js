@@ -187,6 +187,7 @@ export const cancelOrderController = async (request, response) => {
   try {
     const { productId, reason } = request.body;
     console.log("reason", reason);
+    console.log("productId", productId);
 
     if (!productId || !reason) {
       return response.status(400).json({

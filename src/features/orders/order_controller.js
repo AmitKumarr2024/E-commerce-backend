@@ -182,9 +182,12 @@ export const orderDetails = async (request, response) => {
   }
 };
 
+
 export const cancelOrderController = async (request, response) => {
   try {
-    const { productId, reason } = request.body;
+    const { productId, reason } = request.body; // Extract productId and reason from request body
+    console.log("Product ID:", productId);
+    console.log("Cancellation Reason:", reason);
 
     if (!productId) {
       return response.status(400).json({
@@ -194,10 +197,8 @@ export const cancelOrderController = async (request, response) => {
       });
     }
 
-    // Find the order based on productId
-    const order = await order_module.findOne({
-      "productDetails.productId": productId,
-    });
+    // Fetch the order details using the productId
+    const order = await Order.findOne({ "productDetails.productId": productId });
 
     if (!order) {
       return response.status(404).json({
@@ -207,22 +208,20 @@ export const cancelOrderController = async (request, response) => {
       });
     }
 
-    // Store the cancellation reason
-    if (reason) {
-      order.cancellationReason = reason;
-    } else {
-      return response.status(400).json({
-        message: "Cancellation reason is required",
-        error: true,
-        success: false,
-      });
-    }
+    // Create a cancellation record
+    const cancellation = new Cancellation({
+      orderId: order._id,
+      productId: productId,
+      reason: reason,
+    });
+    await cancellation.save();
 
-    // Save the updated order with the cancellation reason
+    // Optionally, update the order to reflect cancellation if needed
+    order.cancellationReason = reason;
     await order.save();
 
-    // Delete the order
-    await order_module.findByIdAndDelete(order._id);
+    // Delete the order if that's still needed
+    await Order.findByIdAndDelete(order._id);
 
     response.status(200).json({
       message: "Order canceled successfully",

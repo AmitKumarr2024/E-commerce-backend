@@ -10,7 +10,7 @@ const orderSchema = new mongoose.Schema(
           price: Number,
           quantity: Number,
           image: String,
-        }
+        },
       ],
       default: [],
     },
@@ -20,8 +20,8 @@ const orderSchema = new mongoose.Schema(
     },
     userId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User', // Assuming you have a User model
-      default: "",
+      ref: "User",
+      required: true, // Ensure this is provided
     },
     paymentDetails: {
       paymentId: {
@@ -44,6 +44,10 @@ const orderSchema = new mongoose.Schema(
     totalAmount: {
       type: Number,
       default: 0,
+    },
+    cancellationReason: {
+      type: String,
+      default: "", // Optional field for storing cancellation reason
     },
   },
   {

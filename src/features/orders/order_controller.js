@@ -3,7 +3,7 @@ import stripe from "../../config/strip.js";
 import UserModel from "../users/user_model.js";
 import order_module from "./order_module.js";
 import CartModel from "../cart/cart_model.js";
-import Cancellation from '../orders/orderCancel_model.js'
+import Cancellation from "../orders/orderCancel_model.js";
 
 // this is secret key
 const endpointSecret = process.env.STRIPE_END_POINT_SECRET_KEY;
@@ -183,11 +183,10 @@ export const orderDetails = async (request, response) => {
   }
 };
 
-
-
 export const cancelOrderController = async (request, response) => {
   try {
     const { productId, reason } = request.body;
+    console.log("reason", reason);
 
     if (!productId || !reason) {
       return response.status(400).json({
@@ -197,7 +196,9 @@ export const cancelOrderController = async (request, response) => {
       });
     }
 
-    const order = await Order.findOne({ "productDetails.productId": productId });
+    const order = await Order.findOne({
+      "productDetails.productId": productId,
+    });
 
     if (!order) {
       return response.status(404).json({

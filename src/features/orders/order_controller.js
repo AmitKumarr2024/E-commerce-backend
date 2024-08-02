@@ -3,6 +3,7 @@ import stripe from "../../config/strip.js";
 import UserModel from "../users/user_model.js";
 import order_module from "./order_module.js";
 import CartModel from "../cart/cart_model.js";
+import Cancellation from "./models/cancellation.js";
 
 // this is secret key
 const endpointSecret = process.env.STRIPE_END_POINT_SECRET_KEY;
@@ -183,11 +184,10 @@ export const orderDetails = async (request, response) => {
 };
 
 
+
 export const cancelOrderController = async (request, response) => {
   try {
-    const { productId, reason } = request.body; // Extract productId and reason from request body
-    console.log("Product ID:", productId);
-    console.log("Cancellation Reason:", reason);
+    const { productId, reason } = request.body;
 
     if (!productId) {
       return response.status(400).json({
@@ -197,7 +197,6 @@ export const cancelOrderController = async (request, response) => {
       });
     }
 
-    // Fetch the order details using the productId
     const order = await Order.findOne({ "productDetails.productId": productId });
 
     if (!order) {
@@ -208,7 +207,6 @@ export const cancelOrderController = async (request, response) => {
       });
     }
 
-    // Create a cancellation record
     const cancellation = new Cancellation({
       orderId: order._id,
       productId: productId,
@@ -216,11 +214,9 @@ export const cancelOrderController = async (request, response) => {
     });
     await cancellation.save();
 
-    // Optionally, update the order to reflect cancellation if needed
     order.cancellationReason = reason;
     await order.save();
 
-    // Delete the order if that's still needed
     await Order.findByIdAndDelete(order._id);
 
     response.status(200).json({

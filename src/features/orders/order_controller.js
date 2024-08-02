@@ -187,42 +187,31 @@ export const orderDetails = async (request, response) => {
 
 export const cancelOrderController = async (request, response) => {
   try {
-    const  productId  = request.body.productId; // Read productId from request body
-    console.log("Product ID:", productId);
+    const userId = request.userId; // Correctly obtain userId
+    console.log("User ID:", userId);
 
-    // Validate productId
-    if (!productId) {
-      return response.status(400).json({
-        message: "Product ID is required",
-        error: true,
-        success: false,
-      });
-    }
+    // Fetch all orders for the user
+    const orders = await order_module.find({ userId });
 
-    // Fetch orders associated with the productId or userId if necessary
-    const orders = await order_module.find({ "productDetails.productId": productId });
-
-    if (!orders.length) {
+    if (orders.length === 0) {
       return response.status(404).json({
-        message: "No orders found for the given product ID",
+        message: "No orders found for this user",
         error: true,
         success: false,
       });
     }
 
-    // Handle refund logic if needed
+    // Process each order
     for (const order of orders) {
-      if (order.paymentDetails.paymentId) {
+      // Handle refund logic if needed
+      if (order.paymentDetails && order.paymentDetails.paymentId) {
         try {
           await stripe.refunds.create({
             payment_intent: order.paymentDetails.paymentId,
           });
         } catch (refundError) {
-          return response.status(500).json({
-            message: "Refund failed: " + refundError.message,
-            error: true,
-            success: false,
-          });
+          console.error("Refund failed:", refundError.message);
+          // Optionally, handle partial success or continue with order deletion
         }
       }
 
@@ -231,10 +220,11 @@ export const cancelOrderController = async (request, response) => {
     }
 
     response.status(200).json({
-      message: "Order(s) canceled successfully",
+      message: "All orders canceled successfully",
       success: true,
     });
   } catch (error) {
+    console.error("Cancel Order Error:", error);
     response.status(500).json({
       message: error.message || "Internal Server Error",
       error: true,

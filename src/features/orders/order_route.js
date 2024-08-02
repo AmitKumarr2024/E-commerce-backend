@@ -12,6 +12,6 @@ const route = new express.Router();
 route.post("/checkout", jwtAuth, paymentController);
 route.post("/webhook", webhooks);
 route.get("/order-list", jwtAuth, orderDetails);
-route.post("/orders",jwtAuth,cancelOrderController);
+route.post('/order/:orderId',jwtAuth,cancelOrderController);
 
 export default route;

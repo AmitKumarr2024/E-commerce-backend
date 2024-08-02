@@ -163,8 +163,7 @@ export const webhooks = async (request, response) => {
 export const orderDetails = async (request, response) => {
   try {
     const currectUserId = request.userId;
-    console.log("currentUser",currectUserId);
-    
+    console.log("currentUser", currectUserId);
 
     const orderList = await order_module
       .find({ userId: currectUserId })
@@ -184,10 +183,10 @@ export const orderDetails = async (request, response) => {
   }
 };
 
-
 export const cancelOrderController = async (request, response) => {
   try {
     const { orderId } = request.body; // Get the orderId from request parameters
+    console.log("order Id :", orderId);
 
     if (!orderId) {
       return response.status(400).json({
@@ -238,4 +237,3 @@ export const cancelOrderController = async (request, response) => {
     });
   }
 };
-

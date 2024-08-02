@@ -187,31 +187,31 @@ export const orderDetails = async (request, response) => {
 
 export const cancelOrderController = async (request, response) => {
   try {
-    const productID = request.userId;
-    console.log("product order",productID);
-    
-  
-      // Validate orderId
-      if (!orderId) {
-        return response.status(400).json({
-          message: "Order ID is required",
-          error: true,
-          success: false,
-        });
-      }
-  
-      // Fetch the order details
-      const order = await order_module.findById(orderId);
-  
-      if (!order) {
-        return response.status(404).json({
-          message: "Order not found",
-          error: true,
-          success: false,
-        });
-      }
-  
-      // If needed, handle refund logic here using Stripe's refund API
+    const { productId } = request.body; // Read productId from request body
+    console.log("Product ID:", productId);
+
+    // Validate productId
+    if (!productId) {
+      return response.status(400).json({
+        message: "Product ID is required",
+        error: true,
+        success: false,
+      });
+    }
+
+    // Fetch orders associated with the productId or userId if necessary
+    const orders = await order_module.find({ "productDetails.productId": productId });
+
+    if (!orders.length) {
+      return response.status(404).json({
+        message: "No orders found for the given product ID",
+        error: true,
+        success: false,
+      });
+    }
+
+    // Handle refund logic if needed
+    for (const order of orders) {
       if (order.paymentDetails.paymentId) {
         try {
           await stripe.refunds.create({
@@ -225,19 +225,20 @@ export const cancelOrderController = async (request, response) => {
           });
         }
       }
-  
+
       // Delete the order
-      await order_module.findByIdAndDelete(orderId);
-  
-      response.status(200).json({
-        message: "Order canceled successfully",
-        success: true,
-      });
-    } catch (error) {
-      response.status(500).json({
-        message: error.message || "Internal Server Error",
-        error: true,
-        success: false,
-      });
+      await order_module.findByIdAndDelete(order._id);
     }
+
+    response.status(200).json({
+      message: "Order(s) canceled successfully",
+      success: true,
+    });
+  } catch (error) {
+    response.status(500).json({
+      message: error.message || "Internal Server Error",
+      error: true,
+      success: false,
+    });
+  }
 };

@@ -3,7 +3,7 @@ import stripe from "../../config/strip.js";
 import UserModel from "../users/user_model.js";
 import order_module from "./order_module.js";
 import CartModel from "../cart/cart_model.js";
-import Cancellation from "./models/cancellation.js";
+import Cancellation from '../orders/orderCancel_model.js'
 
 // this is secret key
 const endpointSecret = process.env.STRIPE_END_POINT_SECRET_KEY;

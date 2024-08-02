@@ -45,10 +45,7 @@ const orderSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
-    cancellationReason: {
-      type: String,
-      default: "", // Optional field for storing cancellation reason
-    },
+  
   },
   {
     timestamps: true,

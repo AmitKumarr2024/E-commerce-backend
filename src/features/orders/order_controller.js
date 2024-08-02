@@ -187,65 +187,57 @@ export const orderDetails = async (request, response) => {
 
 export const cancelOrderController = async (request, response) => {
   try {
-    const { userId, productId } = request.body;
-
-    console.log("User ID:", userId);
-    console.log("Product ID:", productId);
-
-    // Validate userId and productId
-    if (!userId || !productId) {
-      return response.status(400).json({
-        message: "User ID and Product ID are required",
-        error: true,
-        success: false,
-      });
-    }
-
-    // Fetch the order that contains the product for the given user
-    const order = await order_module.findOne({ userId, "productDetails.productId": productId });
-
-    if (!order) {
-      return response.status(404).json({
-        message: "Order not found",
-        error: true,
-        success: false,
-      });
-    }
-
-    // If needed, handle refund logic here using Stripe's refund API
-    if (order.paymentDetails.paymentId) {
-      try {
-        await stripe.refunds.create({
-          payment_intent: order.paymentDetails.paymentId,
-        });
-      } catch (refundError) {
-        return response.status(500).json({
-          message: "Refund failed: " + refundError.message,
+    const productID = request.userId;
+    console.log("product order",productID);
+    
+  
+      // Validate orderId
+      if (!orderId) {
+        return response.status(400).json({
+          message: "Order ID is required",
           error: true,
           success: false,
         });
       }
+  
+      // Fetch the order details
+      const order = await order_module.findById(orderId);
+  
+      if (!order) {
+        return response.status(404).json({
+          message: "Order not found",
+          error: true,
+          success: false,
+        });
+      }
+  
+      // If needed, handle refund logic here using Stripe's refund API
+      if (order.paymentDetails.paymentId) {
+        try {
+          await stripe.refunds.create({
+            payment_intent: order.paymentDetails.paymentId,
+          });
+        } catch (refundError) {
+          return response.status(500).json({
+            message: "Refund failed: " + refundError.message,
+            error: true,
+            success: false,
+          });
+        }
+      }
+  
+      // Delete the order
+      await order_module.findByIdAndDelete(orderId);
+  
+      response.status(200).json({
+        message: "Order canceled successfully",
+        success: true,
+      });
+    } catch (error) {
+      response.status(500).json({
+        message: error.message || "Internal Server Error",
+        error: true,
+        success: false,
+      });
     }
-
-    // Remove the product from the order
-    order.productDetails = order.productDetails.filter(product => product.productId !== productId);
-
-    // If there are no products left in the order, delete the order
-    if (order.productDetails.length === 0) {
-      await order_module.findByIdAndDelete(order._id);
-    } else {
-      await order.save();
-    }
-
-    response.status(200).json({
-      message: "Product removed from order successfully",
-      success: true,
-    });
-  } catch (error) {
-    response.status(500).json({
-      message: error.message || "Internal Server Error",
-      error: true,
-      success: false,
-    });
-  }
 };

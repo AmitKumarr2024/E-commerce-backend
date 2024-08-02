@@ -86,10 +86,8 @@ const getLineItems = async (lineItems) => {
 export const webhooks = async (request, response) => {
   try {
     const sig = request.headers["stripe-signature"];
-    const payloadString = JSON.stringify(request.body);
 
-    console.log("Payload String:", payloadString);
-    console.log("Received Signature:", sig);
+    const payloadString = JSON.stringify(request.body);
 
     const header = stripe.webhooks.generateTestHeaderString({
       payload: payloadString,
@@ -102,12 +100,10 @@ export const webhooks = async (request, response) => {
     try {
       event = stripe.webhooks.constructEvent(
         payloadString,
-        sig, // Use the signature from request headers
+        header, // Use the signature from request headers
         endpointSecret
       );
-      console.log("Constructed Event:", event);
     } catch (err) {
-      console.error(`Webhook Error: ${err.message}`);
       response.status(400).send(`Webhook Error: ${err.message}`);
       return;
     }
@@ -115,10 +111,10 @@ export const webhooks = async (request, response) => {
     switch (event.type) {
       case "checkout.session.completed":
         const session = event.data.object;
-        const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
+        const lineItems = await stripe.checkout.sessions.listLineItems(
+          session.id
+        );
         const productDetails = await getLineItems(lineItems);
-
-        console.log("Product Details:", productDetails);
 
         const OrderDetails = {
           productDetails: productDetails,
@@ -129,25 +125,23 @@ export const webhooks = async (request, response) => {
             payment_method_type: session.payment_method_types,
             payment_status: session.payment_status,
           },
-          shipping_options: session.shipping_options.map((s) => ({
-            ...s,
-            shipping_amount: s.shipping_amount / 100,
-          })),
+          shipping_options: session.shipping_options.map((s) => {
+            return {
+              ...s,
+              shipping_amount: s.shipping_amount / 100,
+            };
+          }),
           totalAmount: session.amount_total / 100,
         };
 
-        console.log("Order Details:", OrderDetails);
-
-        const order = new order_module(OrderDetails); // Ensure order_module is correctly instantiated
+        const order = order_module(OrderDetails);
 
         const saveOrder = await order.save();
-        console.log("Saved Order:", saveOrder);
 
         if (saveOrder?._id) {
           const deleteCartItems = await CartModel.deleteMany({
             userId: session.metadata.userId,
           });
-          console.log("Deleted Cart Items:", deleteCartItems);
         }
 
         break;
@@ -155,7 +149,6 @@ export const webhooks = async (request, response) => {
       default:
         console.log(`Unhandled event type ${event.type}`);
     }
-
     response.status(200).send();
   } catch (error) {
     console.error("Webhook error:", error);
@@ -166,7 +159,6 @@ export const webhooks = async (request, response) => {
     });
   }
 };
-
 
 export const orderDetails = async (request, response) => {
   try {
@@ -191,4 +183,40 @@ export const orderDetails = async (request, response) => {
 };
 
 
+export const cancelOrderController = async (request, response) => {
+  try {
+    const { orderId } = request.body;
 
+    // Fetch the order details
+    const order = await order_module.findById(orderId);
+
+    if (!order) {
+      return response.status(404).json({
+        message: "Order not found",
+        error: true,
+        success: false,
+      });
+    }
+
+    // If needed, handle refund logic here using Stripe's refund API
+    if (order.paymentDetails.paymentId) {
+      await stripe.refunds.create({
+        payment_intent: order.paymentDetails.paymentId,
+      });
+    }
+
+    // Delete the order
+    await order_module.findByIdAndDelete(orderId);
+
+    response.status(200).json({
+      message: "Order canceled successfully",
+      success: true,
+    });
+  } catch (error) {
+    response.status(500).json({
+      message: error?.message || error,
+      error: true,
+      success: false,
+    });
+  }
+};

@@ -163,7 +163,6 @@ export const webhooks = async (request, response) => {
 export const orderDetails = async (request, response) => {
   try {
     const currectUserId = request.userId;
-    console.log("currentUser", currectUserId);
 
     const orderList = await order_module
       .find({ userId: currectUserId })
@@ -185,20 +184,20 @@ export const orderDetails = async (request, response) => {
 
 export const cancelOrderController = async (request, response) => {
   try {
-    const { orderId } = request.params; // Extract orderId from request parameters
-    console.log("Order ID:", orderId);
+    const { productId } = request.body;
+    console.log("product id :", productId);
 
-    
-    if (!orderId) {
+    if (!productId) {
       return response.status(400).json({
-        message: "Order ID is required",
+        message: "Product ID is required",
         error: true,
         success: false,
       });
     }
 
-    // Fetch the order details
-    const order = await order_module.findById(orderId);
+    const order = await order_module.findOne({
+      "productDetails.productId": productId,
+    });
 
     if (!order) {
       return response.status(404).json({
@@ -208,7 +207,6 @@ export const cancelOrderController = async (request, response) => {
       });
     }
 
-    // Handle refund logic if necessary
     if (order.paymentDetails.paymentId) {
       try {
         await stripe.refunds.create({
@@ -223,8 +221,7 @@ export const cancelOrderController = async (request, response) => {
       }
     }
 
-    // Delete the order
-    await order_module.findByIdAndDelete(orderId);
+    await order_module.findByIdAndDelete(order._id);
 
     response.status(200).json({
       message: "Order canceled successfully",

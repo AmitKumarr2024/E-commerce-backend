@@ -184,8 +184,9 @@ export const orderDetails = async (request, response) => {
 
 export const cancelOrderController = async (request, response) => {
   try {
-    const { productId } = request.body;
-    console.log("product id :", productId);
+    const { productId, reason } = request.body; // Extract productId and reason from request body
+    console.log("Product ID:", productId);
+    console.log("Cancellation Reason:", reason);
 
     if (!productId) {
       return response.status(400).json({
@@ -195,9 +196,8 @@ export const cancelOrderController = async (request, response) => {
       });
     }
 
-    const order = await order_module.findOne({
-      "productDetails.productId": productId,
-    });
+    // Fetch the order details using the productId
+    const order = await order_module.findOne({ "productDetails.productId": productId });
 
     if (!order) {
       return response.status(404).json({
@@ -207,6 +207,7 @@ export const cancelOrderController = async (request, response) => {
       });
     }
 
+    // Handle refund logic if necessary
     if (order.paymentDetails.paymentId) {
       try {
         await stripe.refunds.create({
@@ -221,6 +222,11 @@ export const cancelOrderController = async (request, response) => {
       }
     }
 
+    // Store the cancellation reason (ensure your model includes this field)
+    order.cancellationReason = reason;
+    await order.save();
+
+    // Delete the order
     await order_module.findByIdAndDelete(order._id);
 
     response.status(200).json({
@@ -235,3 +241,4 @@ export const cancelOrderController = async (request, response) => {
     });
   }
 };
+

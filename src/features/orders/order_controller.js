@@ -187,7 +187,7 @@ export const orderDetails = async (request, response) => {
 
 export const cancelOrderController = async (request, response) => {
   try {
-    const { orderId } = request.params; // Get the orderId from request parameters
+    const { orderId } = request.body; // Get the orderId from request parameters
 
     if (!orderId) {
       return response.status(400).json({

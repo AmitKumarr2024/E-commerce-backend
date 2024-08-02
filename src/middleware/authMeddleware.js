@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken';
 
 const jwtAuth = (req, res, next) => {
   const token = req.cookies?.token;
-  const id = req.params._id;
+  const id = req.params?.id;
 
   
   console.log("JWT Token:", token);
@@ -40,6 +40,7 @@ const jwtAuth = (req, res, next) => {
       return res.status(500).json({ error: 'Internal Server Error' });
     }
   }
+
 };
 
 export default jwtAuth;

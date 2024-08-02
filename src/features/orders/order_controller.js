@@ -185,7 +185,7 @@ export const orderDetails = async (request, response) => {
 
 export const cancelOrderController = async (request, response) => {
   try {
-    const { orderId } = request.params;
+    const { orderId } = request.body;
 
     // Fetch the order details
     const order = await order_module.findById(orderId);

@@ -187,7 +187,7 @@ export const orderDetails = async (request, response) => {
 
 export const cancelOrderController = async (request, response) => {
   try {
-    const productID = request;
+    const productID = request.userId;
     console.log("product order",productID);
     
   

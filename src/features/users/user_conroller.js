@@ -67,7 +67,7 @@ export const login = async (req, res) => {
         }
       } catch (err) {
         // Token is invalid or expired
-        res.status(400).json("Invalid or expired token:", err.message);
+        res.status(400).json({"Invalid or expired token:", err.message});
       }
     }
 

@@ -11,7 +11,7 @@ import CheckoutRoute from "./src/features/orders/order_route.js";
 
 dotenv.config();
 const app = express();
-const port = process.env.PORT;
+const port = process.env.PORT||8001;
 
 app.use(cookieParser());
 

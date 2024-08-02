@@ -163,6 +163,8 @@ export const webhooks = async (request, response) => {
 export const orderDetails = async (request, response) => {
   try {
     const currectUserId = request.userId;
+    console.log("currentUser",currectUserId);
+    
 
     const orderList = await order_module
       .find({ userId: currectUserId })

@@ -197,7 +197,7 @@ export const cancelOrderController = async (request, response) => {
       });
     }
 
-    const order = await Order.findOne({
+    const order = await order_module.findOne({
       "productDetails.productId": productId,
     });
 
@@ -209,14 +209,14 @@ export const cancelOrderController = async (request, response) => {
       });
     }
 
-    const cancellation = await Cancellation({
+    const cancellation = new Cancellation({
       orderId: order._id,
       productId: productId,
       reason: reason,
     });
     await cancellation.save();
 
-    await Order.findByIdAndDelete(order._id);
+    await order_module.findByIdAndDelete(order._id);
 
     response.status(200).json({
       message: "Order canceled successfully",

@@ -186,7 +186,7 @@ export const orderDetails = async (request, response) => {
 export const cancelOrderController = async (request, response) => {
   try {
     const { orderId } = request.body;
-    console.log(request.body);
+    console.log("cancel order",request.body);
     
   
       // Validate orderId

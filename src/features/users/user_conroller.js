@@ -67,7 +67,7 @@ export const login = async (req, res) => {
         }
       } catch (err) {
         // Token is invalid or expired
-        res.status(400).json({"Invalid or expired token:": err.message});
+        return res.status(400).json({ message: "Invalid or expired token", error: err.message });
       }
     }
 
@@ -79,7 +79,7 @@ export const login = async (req, res) => {
 
     // Generate token
     const newToken = await jwt.sign(tokenData, process.env.SECRET_KEY, {
-      expiresIn: 24 * 60 * 60, // Token expiry set to 8 hours
+      expiresIn: 24 * 60 * 60, // Token expiry set to 24 hours
     });
 
     // Determine if the environment is production
@@ -87,7 +87,7 @@ export const login = async (req, res) => {
 
     const tokenOptions = {
       httpOnly: true,
-      secure: true, // Secure cookies only in production
+      secure: isProduction, // Secure cookies only in production
       sameSite: isProduction ? "None" : "Lax", // Adjust for development vs. production
     };
 
@@ -99,11 +99,10 @@ export const login = async (req, res) => {
       error: false,
     });
   } catch (error) {
-    return res
-      .status(500)
-      .json({ message: "Login failed", error: true, success: false });
+    return res.status(500).json({ message: "Login failed", error: true, success: false });
   }
 };
+
 
 // user Details
 

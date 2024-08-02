@@ -206,7 +206,7 @@ export const cancelOrderController = async (request, response) => {
     }
 
     // Delete the order
-    await order_module.findByIdAndDelete(orderId);
+    await order_module.deleteMany(orderId);
 
     response.status(200).json({
       message: "Order canceled successfully",

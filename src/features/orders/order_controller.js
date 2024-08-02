@@ -207,6 +207,19 @@ export const cancelOrderController = async (request, response) => {
 
     if (order.paymentDetails.paymentId) {
       try {
+        // Retrieve the charge from Stripe
+        const charge = await stripe.charges.retrieve(order.paymentDetails.paymentId);
+
+        // Check if the charge has already been refunded
+        if (charge.refunded) {
+          return response.status(400).json({
+            message: "Charge has already been refunded",
+            error: true,
+            success: false,
+          });
+        }
+
+        // Issue the refund
         await stripe.refunds.create({
           payment_intent: order.paymentDetails.paymentId,
         });

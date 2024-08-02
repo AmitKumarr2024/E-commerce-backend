@@ -162,37 +162,25 @@ export const webhooks = async (request, response) => {
 
 export const orderDetails = async (request, response) => {
   try {
-    // Ensure userId is provided and valid
     const currectUserId = request.userId;
-    if (!currectUserId) {
-      return response.status(400).json({
-        message: "User ID is required",
-        error: true,
-        success: false,
-      });
-    }
 
-    // Fetch orders for the current user
     const orderList = await order_module
       .find({ userId: currectUserId })
       .sort({ createdAt: -1 });
 
-    // Respond with order details
-    response.status(200).json({
+    response.status(201).json({
       data: orderList,
-      message: "Order list retrieved successfully",
+      message: "Order-List",
       success: true,
     });
   } catch (error) {
-    // Respond with error details
-    response.status(500).json({
-      message: error?.message || "An error occurred while retrieving orders",
+    response.json({
+      message: error?.message || error,
       error: true,
       success: false,
     });
   }
 };
-
 
 
 

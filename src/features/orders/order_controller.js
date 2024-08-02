@@ -4,6 +4,7 @@ import UserModel from "../users/user_model.js";
 import order_module from "./order_module.js";
 import CartModel from "../cart/cart_model.js";
 import Cancellation from "../orders/orderCancel_model.js";
+import user_model from "../users/user_model.js";
 
 // this is secret key
 const endpointSecret = process.env.STRIPE_END_POINT_SECRET_KEY;
@@ -220,6 +221,34 @@ export const cancelOrderController = async (request, response) => {
 
     response.status(200).json({
       message: "Order canceled successfully",
+      success: true,
+    });
+  } catch (error) {
+    response.status(500).json({
+      message: error.message || "Internal Server Error",
+      error: true,
+      success: false,
+    });
+  }
+};
+
+export const allOrder = async (request, response) => {
+  try {
+    const userId = request.userId;
+    const userExist = await user_model.findById(userId);
+
+    if (userExist != "Admin") {
+      return response.status(400).json({
+        message: "Access Denied!!!",
+        error: true,
+      });
+    }
+
+    const allOrder = await order_module.find().sort({ createdAt: -1 });
+
+    response.status(200).json({
+      message: "Request completed successfully",
+      data: allOrder,
       success: true,
     });
   } catch (error) {

@@ -235,6 +235,8 @@ export const cancelOrderController = async (request, response) => {
 export const allOrder = async (request, response) => {
   try {
     const userId = request.userId;
+    console.log(userId);
+    
     const userExist = await user_model.findById(userId);
 
     if (!userExist || userExist.role !== "Admin") { // Check if user exists and has Admin role

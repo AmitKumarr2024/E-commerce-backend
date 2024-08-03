@@ -238,28 +238,19 @@ export const allOrder = async (request, response) => {
 
     const userExist = await user_model.findById(userId);
 
-    if (userExist.role != "ADMIN") {
-      // Check if user exists and has Admin role
+    if (userExist.role !== "ADMIN") {
       return response.status(400).json({
         message: "Access Denied!!!",
         error: true,
       });
     }
 
-    const allOrder = await order_module.find().sort({ createdAt: -1 });
-
-    
+    const allOrder = await order_module.find().sort({ createdAt: -1 }).populate('userId');
 
     response.status(200).json({
       message: "Request completed successfully",
       data: {
         orders: allOrder,
-        user: {
-          name: userExist.name, // Adjust these fields according to your user model
-          email: userExist.email,
-          role: userExist.role,
-          // Add any other relevant user details here
-        },
       },
       success: true,
     });

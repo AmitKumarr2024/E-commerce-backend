@@ -249,7 +249,15 @@ export const allOrder = async (request, response) => {
 
     response.status(200).json({
       message: "Request completed successfully",
-      data: allOrder,
+      data: {
+        orders: allOrder,
+        user: {
+          name: userExist.name,  // Adjust these fields according to your user model
+          email: userExist.email,
+          role: userExist.role,
+          // Add any other relevant user details here
+        },
+      },
       success: true,
     });
   } catch (error) {

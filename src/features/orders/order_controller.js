@@ -248,16 +248,12 @@ export const allOrder = async (request, response) => {
 
     const allOrder = await order_module.find().sort({ createdAt: -1 });
 
-    // Add creation time to each order
-    const ordersWithCreationTime = allOrder.map((order) => ({
-      ...order,
-      createdAt: order.createdAt, // Include the creation time
-    }));
+    
 
     response.status(200).json({
       message: "Request completed successfully",
       data: {
-        orders: ordersWithCreationTime,
+        orders: allOrder,
         user: {
           name: userExist.name, // Adjust these fields according to your user model
           email: userExist.email,

@@ -238,7 +238,7 @@ export const allOrder = async (request, response) => {
     
     const userExist = await user_model.findById(userId);
 
-    if ( userExist.role != "Admin") { // Check if user exists and has Admin role
+    if ( userExist.role != "ADMIN") { // Check if user exists and has Admin role
       return response.status(400).json({
         message: "Access Denied!!!",
         error: true,

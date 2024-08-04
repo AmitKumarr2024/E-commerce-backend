@@ -164,25 +164,39 @@ export const webhooks = async (request, response) => {
 
 export const orderDetails = async (request, response) => {
   try {
-    const currectUserId = request.userId;
+    const currentUserId = request.userId;
 
+    // Fetch orders for the current user
     const orderList = await order_module
-      .find({ userId: currectUserId })
+      .find({ userId: currentUserId })
       .sort({ createdAt: -1 });
 
-    response.status(201).json({
+    // Format the order details for email
+    const user = await user_model.findById(currentUserId); // Fetch user details if needed
+    const orderDetails = orderList.map(order => 
+      `Order ID: ${order._id}, Created At: ${order.createdAt}, Total: ${order.total}`
+    ).join('\n');
+
+    // Send email with order details
+    if (user && user.email) {
+      await sendOrderConfirmationEmail(user.email, `Here are your order details:\n\n${orderDetails}`);
+    }
+
+    // Send the response with order details
+    response.status(200).json({
       data: orderList,
-      message: "Order-List",
+      message: "Order list fetched successfully",
       success: true,
     });
   } catch (error) {
-    response.json({
-      message: error?.message || error,
+    response.status(500).json({
+      message: error.message || "Internal Server Error",
       error: true,
       success: false,
     });
   }
 };
+
 
 export const cancelOrderController = async (request, response) => {
   try {

@@ -162,6 +162,7 @@ export const webhooks = async (request, response) => {
   }
 };
 
+
 export const orderDetails = async (request, response) => {
   try {
     const currentUserId = request.userId; // Ensure this is correctly set
@@ -172,7 +173,7 @@ export const orderDetails = async (request, response) => {
       .sort({ createdAt: -1 });
 
     // Log order list to debug
-    console.log("Order List:", orderList);
+    console.log("Order Lists:", orderList);
 
     // Fetch user details to get the email address
     const user = await user_model.findById(currentUserId);
@@ -181,7 +182,7 @@ export const orderDetails = async (request, response) => {
     }
 
     // Format order details
-    const orderDetails = orderList.map(order =>
+    const orderDetails = await orderList.map(order =>
       `Order ID: ${order._id}, Created At: ${order.createdAt}, Total: ${order.totalAmount}`
     ).join('\n');
 

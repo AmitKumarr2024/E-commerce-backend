@@ -42,6 +42,9 @@ This project aims to provide a user-friendly interface for managing tasks and pr
 
 ## Live Project
 
+https://ecommercemarkets.netlify.app/
+[![Netlify Status](https://api.netlify.com/api/v1/badges/ca0a266e-2129-4308-aeac-c9e8975557df/deploy-status)](https://app.netlify.com/sites/ecommercemarkets/deploys)
+
 
 
 

@@ -174,6 +174,17 @@ export const orderDetails = async (request, response) => {
     // Log order list to debug
     console.log('Order List:', orderList);
 
+    // Check if there are any orders
+    if (orderList.length === 0) {
+      console.log('No orders found for the user.');
+      response.status(200).json({
+        data: [],
+        message: "No orders found",
+        success: true,
+      });
+      return;
+    }
+
     // Format the order details for email
     const user = await user_model.findById(currentUserId); // Fetch user details if needed
     const orderDetails = orderList.map(order => 
@@ -183,23 +194,25 @@ export const orderDetails = async (request, response) => {
     // Log formatted order details
     console.log('Formatted Order Details:', orderDetails);
 
-    // Send email with order details
+    // Send email with order details (optional)
     if (user && user.email) {
       try {
         await sendOrderConfirmationEmail(user.email, `Here are your order details:\n\n${orderDetails}`);
         console.log('Email sent successfully to:', user.email);
       } catch (emailError) {
         console.error('Error sending email:', emailError);
+        // Email failure is logged but does not affect the order list response
       }
     }
 
     // Send the response with order details
     response.status(200).json({
       data: orderList,
-      message: "Order list fetched Successfully",
+      message: "Order list fetched successfully",
       success: true,
     });
   } catch (error) {
+    console.error('Error in orderDetails function:', error);
     response.status(500).json({
       message: error.message || "Internal Server Error",
       error: true,

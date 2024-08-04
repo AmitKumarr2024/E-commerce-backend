@@ -12,10 +12,11 @@ const sendOrderConfirmationEmail = async (to, text) => {
   try {
     await transporter.sendMail({
       from: process.env.EMAIL_USER, // sender address
-      to: to, // list of receivers
-      subject: 'Order Confirmation', // Subject line
-      text: text, // plain text body
+      to: to, // receiver
+      subject: 'Order Confirmation', // subject line
+      text: text, // email body
     });
+    console.log('Email sent successfully to:', to);
   } catch (error) {
     console.error('Error sending email:', error);
   }

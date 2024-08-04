@@ -171,15 +171,26 @@ export const orderDetails = async (request, response) => {
       .find({ userId: currentUserId })
       .sort({ createdAt: -1 });
 
+    // Log order list to debug
+    console.log('Order List:', orderList);
+
     // Format the order details for email
     const user = await user_model.findById(currentUserId); // Fetch user details if needed
     const orderDetails = orderList.map(order => 
       `Order ID: ${order._id}, Created At: ${order.createdAt}, Total: ${order.total}`
     ).join('\n');
 
+    // Log formatted order details
+    console.log('Formatted Order Details:', orderDetails);
+
     // Send email with order details
     if (user && user.email) {
-      await sendOrderConfirmationEmail(user.email, `Here are your order details:\n\n${orderDetails}`);
+      try {
+        await sendOrderConfirmationEmail(user.email, `Here are your order details:\n\n${orderDetails}`);
+        console.log('Email sent successfully to:', user.email);
+      } catch (emailError) {
+        console.error('Error sending email:', emailError);
+      }
     }
 
     // Send the response with order details
@@ -196,6 +207,7 @@ export const orderDetails = async (request, response) => {
     });
   }
 };
+
 
 
 export const cancelOrderController = async (request, response) => {

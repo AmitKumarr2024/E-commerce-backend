@@ -5,7 +5,6 @@ import order_module from "./order_module.js";
 import CartModel from "../cart/cart_model.js";
 import Cancellation from "../orders/orderCancel_model.js";
 import user_model from "../users/user_model.js";
-import sendOrderConfirmationEmail from "../../helper/sendOrderConfirmationEmail.js";
 
 // this is secret key
 const endpointSecret = process.env.STRIPE_END_POINT_SECRET_KEY;
@@ -89,6 +88,7 @@ const getLineItems = async (lineItems) => {
 export const webhooks = async (request, response) => {
   try {
     const sig = request.headers["stripe-signature"];
+
     const payloadString = JSON.stringify(request.body);
 
     const header = stripe.webhooks.generateTestHeaderString({
@@ -113,7 +113,9 @@ export const webhooks = async (request, response) => {
     switch (event.type) {
       case "checkout.session.completed":
         const session = event.data.object;
-        const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
+        const lineItems = await stripe.checkout.sessions.listLineItems(
+          session.id
+        );
         const productDetails = await getLineItems(lineItems);
 
         const OrderDetails = {
@@ -134,24 +136,14 @@ export const webhooks = async (request, response) => {
           totalAmount: session.amount_total / 100,
         };
 
-        // Save order to database
-        const order = new order_module(OrderDetails); // Create new order instance
+        const order = order_module(OrderDetails);
+
         const saveOrder = await order.save();
 
         if (saveOrder?._id) {
-          // Clear cart items for the user
-          await CartModel.deleteMany({ userId: session.metadata.userId });
-
-          // Send email with order details
-          try {
-            await sendOrderConfirmationEmail(
-              session.customer_email, 
-              `Your order has been successfully processed.\n\nOrder Details:\n\n${JSON.stringify(OrderDetails, null, 2)}`
-            );
-            console.log('Order confirmation email sent successfully.');
-          } catch (emailError) {
-            console.error('Error sending order confirmation email:', emailError);
-          }
+          const deleteCartItems = await CartModel.deleteMany({
+            userId: session.metadata.userId,
+          });
         }
 
         break;
@@ -159,12 +151,11 @@ export const webhooks = async (request, response) => {
       default:
         console.log(`Unhandled event type ${event.type}`);
     }
-
     response.status(200).send();
   } catch (error) {
     console.error("Webhook error:", error);
     response.status(500).json({
-      message: error?.message || "Internal Server Error",
+      message: error?.message || error,
       error: true,
       success: false,
     });

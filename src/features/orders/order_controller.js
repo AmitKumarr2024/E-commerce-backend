@@ -185,7 +185,7 @@ export const orderDetails = async (request, response) => {
     // Send the response with order details
     response.status(200).json({
       data: orderList,
-      message: "Order list fetched successfully",
+      message: "Order list fetched Successfully",
       success: true,
     });
   } catch (error) {

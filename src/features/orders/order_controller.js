@@ -164,26 +164,32 @@ export const webhooks = async (request, response) => {
 
 export const orderDetails = async (request, response) => {
   try {
-    const currectUserId = request.userId;
+    const currentUserId = request.userId; // Corrected typo
 
+    // Fetch orders for the current user
     const orderList = await order_module
-      .find({ userId: currectUserId })
+      .find({ userId: currentUserId }) // Ensure userId matches the schema field
       .sort({ createdAt: -1 });
 
-    response.status(201).json({
+    // Log order list to debug
+    console.log('Order List:', orderList);
+
+    // Send the response with order details
+    response.status(200).json({
       data: orderList,
-      message: "Order-List",
+      message: "Order-List fetched successfully",
       success: true,
     });
   } catch (error) {
-    response.json({
-      message: error?.message || error,
+    console.error('Error fetching order details:', error);
+
+    response.status(500).json({
+      message: error.message || "Internal Server Error",
       error: true,
       success: false,
     });
   }
 };
-
 
 export const cancelOrderController = async (request, response) => {
   try {

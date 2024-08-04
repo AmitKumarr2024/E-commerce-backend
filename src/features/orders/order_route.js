@@ -4,7 +4,6 @@ import {
   cancelOrderController,
   orderDetails,
   paymentController,
-  sendOrderConfirmationEmail,
   webhooks,
 } from "./order_controller.js";
 import jwtAuth from "../../middleware/authMeddleware.js";
@@ -16,6 +15,5 @@ route.post("/webhook", webhooks);
 route.get("/order-list", jwtAuth, orderDetails);
 route.post("/orders", jwtAuth, cancelOrderController);
 route.get("/all-order", jwtAuth, allOrder);
-route.post('/send-order-confirmation',jwtAuth,sendOrderConfirmationEmail)
 
 export default route;

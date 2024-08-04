@@ -164,7 +164,7 @@ export const webhooks = async (request, response) => {
 
 export const orderDetails = async (request, response) => {
   try {
-    const currentUserId = request.userId; // Corrected typo
+    const currentUserId = request.userId; // Ensure this is correctly set
 
     // Fetch orders for the current user
     const orderList = await order_module
@@ -174,14 +174,28 @@ export const orderDetails = async (request, response) => {
     // Log order list to debug
     console.log("Order List:", orderList);
 
+    // Fetch user details to get the email address
+    const user = await user_model.findById(currentUserId);
+    if (!user || !user.email) {
+      return response.status(404).json({ message: "User not found or email not available", success: false });
+    }
+
+    // Format order details
+    const orderDetails = orderList.map(order =>
+      `Order ID: ${order._id}, Created At: ${order.createdAt}, Total: ${order.totalAmount}`
+    ).join('\n');
+
+    // Send confirmation email
+    await sendOrderConfirmationEmail(user.email, `Here are your order details:\n\n${orderDetails}`);
+
     // Send the response with order details
     response.status(200).json({
       data: orderList,
-      message: "Order-List fetched successfully",
+      message: "Order-List fetched and confirmation email sent successfully",
       success: true,
     });
   } catch (error) {
-    console.error("Error fetching order details:", error);
+    console.error("Error fetching order details or sending email:", error);
 
     response.status(500).json({
       message: error.message || "Internal Server Error",

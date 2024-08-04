@@ -88,9 +88,8 @@ const getLineItems = async (lineItems) => {
 export const webhooks = async (request, response) => {
   try {
     const sig = request.headers["stripe-signature"];
-    const payloadString = JSON.stringify(request.body);
 
-    console.log('Received webhook payload:', payloadString);
+    const payloadString = JSON.stringify(request.body);
 
     const header = stripe.webhooks.generateTestHeaderString({
       payload: payloadString,
@@ -103,11 +102,10 @@ export const webhooks = async (request, response) => {
     try {
       event = stripe.webhooks.constructEvent(
         payloadString,
-        sig, // Use the signature from request headers
+        header, // Use the signature from request headers
         endpointSecret
       );
     } catch (err) {
-      console.error('Webhook Error:', err.message);
       response.status(400).send(`Webhook Error: ${err.message}`);
       return;
     }
@@ -115,13 +113,10 @@ export const webhooks = async (request, response) => {
     switch (event.type) {
       case "checkout.session.completed":
         const session = event.data.object;
-        console.log('Session object:', session);
-
-        const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
-        console.log('Line items:', lineItems);
-
+        const lineItems = await stripe.checkout.sessions.listLineItems(
+          session.id
+        );
         const productDetails = await getLineItems(lineItems);
-        console.log('Product details:', productDetails);
 
         const OrderDetails = {
           productDetails: productDetails,
@@ -132,24 +127,23 @@ export const webhooks = async (request, response) => {
             payment_method_type: session.payment_method_types,
             payment_status: session.payment_status,
           },
-          shipping_options: session.shipping_options.map((s) => ({
-            ...s,
-            shipping_amount: s.shipping_amount / 100,
-          })),
+          shipping_options: session.shipping_options.map((s) => {
+            return {
+              ...s,
+              shipping_amount: s.shipping_amount / 100,
+            };
+          }),
           totalAmount: session.amount_total / 100,
         };
 
-        console.log('OrderDetails:', OrderDetails);
+        const order = order_module(OrderDetails);
 
-        const order = new order_module(OrderDetails); // Create a new instance of order
         const saveOrder = await order.save();
-        console.log('Saved order:', saveOrder);
 
         if (saveOrder?._id) {
           const deleteCartItems = await CartModel.deleteMany({
             userId: session.metadata.userId,
           });
-          console.log('Deleted cart items:', deleteCartItems);
         }
 
         break;
@@ -161,13 +155,12 @@ export const webhooks = async (request, response) => {
   } catch (error) {
     console.error("Webhook error:", error);
     response.status(500).json({
-      message: error.message || "Internal Server Error",
+      message: error?.message || error,
       error: true,
       success: false,
     });
   }
 };
-
 
 export const orderDetails = async (request, response) => {
   try {
@@ -300,7 +293,7 @@ export const sendOrderConfirmationEmail = async (request, response) => {
 
     // Send email
     if (user.email) {
-      await sendOrderConfirmationEmail(user.email, `Here are your order details:\n\n${orderDetails}`);
+      await sendOrderConfirmationEmai(user.email, `Here are your order details:\n\n${orderDetails}`);
     }
 
     response.status(200).json({

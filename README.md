@@ -29,7 +29,7 @@ This project aims to provide a user-friendly interface for managing tasks and pr
 
 ## Technologies
 
-**React**: A JavaScript library for building user interfaces.
+- **React**: A JavaScript library for building user interfaces.
 - **Tailwind CSS**: A utility-first CSS framework for styling.
 - **Redux Toolkit**: A state management library for React.
 - **Context API**: Provides a way to manage global state and share data across components without prop drilling.

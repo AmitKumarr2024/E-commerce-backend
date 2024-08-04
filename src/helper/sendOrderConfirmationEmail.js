@@ -1,29 +1,22 @@
-import nodemailer from 'nodemailer';
+const nodemailer = require('nodemailer');
 
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
+  service: 'gmail', // or use a different email service
   auth: {
-    user: 'your-email@gmail.com',
-    pass: 'your-email-password'
-  }
+    user: process.env.EMAIL_USER, // your email address
+    pass: process.env.EMAIL_PASS, // your email password or app-specific password
+  },
 });
 
-const sendOrderConfirmationEmail = (to, orderDetails) => {
-  const mailOptions = {
-    from: 'your-email@gmail.com',
-    to,
-    subject: 'Order Confirmation',
-    text: `Thank you for your order! Here are your order details: ${orderDetails}`
-  };
-
-  return new Promise((resolve, reject) => {
-    transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
-        return reject(error);
-      }
-      resolve(info);
+const sendOrderConfirmationEmail = async (to, text) => {
+  try {
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER, // sender address
+      to: to, // list of receivers
+      subject: 'Order Confirmation', // Subject line
+      text: text, // plain text body
     });
-  });
+  } catch (error) {
+    console.error('Error sending email:', error);
+  }
 };
-
-export default sendOrderConfirmationEmail;

@@ -172,7 +172,7 @@ export const orderDetails = async (request, response) => {
       .sort({ createdAt: -1 });
 
     // Log order list to debug
-    console.log('Order List:', orderList);
+    console.log("Order List:", orderList);
 
     // Send the response with order details
     response.status(200).json({
@@ -181,7 +181,7 @@ export const orderDetails = async (request, response) => {
       success: true,
     });
   } catch (error) {
-    console.error('Error fetching order details:', error);
+    console.error("Error fetching order details:", error);
 
     response.status(500).json({
       message: error.message || "Internal Server Error",
@@ -252,7 +252,10 @@ export const allOrder = async (request, response) => {
       });
     }
 
-    const allOrder = await order_module.find().sort({ createdAt: -1 }).populate('userId');
+    const allOrder = await order_module
+      .find()
+      .sort({ createdAt: -1 })
+      .populate("userId");
 
     response.status(200).json({
       message: "Request completed successfully",
@@ -270,7 +273,6 @@ export const allOrder = async (request, response) => {
   }
 };
 
-
 export const sendOrderConfirmationEmail = async (request, response) => {
   try {
     const { userId } = request.body;
@@ -278,31 +280,41 @@ export const sendOrderConfirmationEmail = async (request, response) => {
     // Fetch user and order details
     const user = await user_model.findById(userId);
     if (!user) {
-      return response.status(404).json({ message: "User not found", success: false });
+      return response
+        .status(404)
+        .json({ message: "User not found", success: false });
     }
 
     const orders = await order_module.find({ userId }).sort({ createdAt: -1 });
     if (orders.length === 0) {
-      return response.status(404).json({ message: "No orders found", success: false });
+      return response
+        .status(404)
+        .json({ message: "No orders found", success: false });
     }
 
     // Format order details
-    const orderDetails = orders.map(order =>
-      `Order ID: ${order._id}, Created At: ${order.createdAt}, Total: ${order.total}`
-    ).join('\n');
+    const orderDetails = orders
+      .map(
+        (order) =>
+          `Order ID: ${order._id}, Created At: ${order.createdAt}, Total: ${order.total}`
+      )
+      .join("\n");
 
     // Send email
     if (user.email) {
-      await sendOrderConfirmationEmai(user.email, `Here are your order details:\n\n${orderDetails}`);
+      await sendOrderConfirmationEmail(
+        user.email,
+        `Here are your order details:\n\n${orderDetails}`
+      );
     }
 
     response.status(200).json({
-      data:orderDetails,
+      data: orderDetails,
       message: "Order details email sent successfully",
       success: true,
     });
   } catch (error) {
-    console.error('Error sending email:', error);
+    console.error("Error sending email:", error);
     response.status(500).json({
       message: error.message || "Internal Server Error",
       error: true,

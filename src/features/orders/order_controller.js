@@ -297,6 +297,7 @@ export const sendOrderConfirmationEmail = async (request, response) => {
     }
 
     response.status(200).json({
+      data:orderDetails,
       message: "Order details email sent successfully",
       success: true,
     });

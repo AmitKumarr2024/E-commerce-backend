@@ -1,18 +1,20 @@
 import nodemailer from 'nodemailer';
 
+// Create a transporter using your email service
 const transporter = nodemailer.createTransport({
-  service: 'gmail', // or use a different email service
+  service: 'gmail',
   auth: {
-    user: process.env.EMAIL_USER, // your email address
-    pass: process.env.EMAIL_PASS, // your email password or app-specific password
-  },
+    user: process.env.EMAIL_USER, // Your email address
+    pass: process.env.EMAIL_PASS  // Your email password or app-specific password
+  }
 });
 
+// Example function to send email
 const sendOrderConfirmationEmail = async (to, text) => {
   try {
     await transporter.sendMail({
       from: process.env.EMAIL_USER, // sender address
-      to: to, // receiver
+      to: to, // receiver address
       subject: 'Order Confirmation', // subject line
       text: text, // email body
     });
